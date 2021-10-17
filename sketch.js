@@ -2,6 +2,8 @@ var canvas;
 var backgroundImage, car1_img, car2_img, track;
 var fuelImage, powerCoinImage;
 
+//create variables for obstacle image
+var obstacles,obstacle1Image,obstacle2Image;
 var database, gameState;
 var form, player, playerCount;
 var allPlayers, car1, car2, fuels, powerCoins, obstacles;
@@ -14,6 +16,9 @@ function preload() {
   track = loadImage("../assets/track.jpg");
   fuelImage = loadImage("./assets/fuel.png");
   powerCoinImage = loadImage("./assets/goldCoin.png");
+  //load images
+  obstacle1Image = loadImage("./assets/obstacle1.png");
+  obstacle2Image = loadImage("./assets/obstacle2.png");
 }
 
 function setup() {

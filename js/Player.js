@@ -26,6 +26,21 @@ class Player {
       score: this.score
     });
   }
+  
+  getCarsAtEnd(){
+    var carsAtEndRef = database.ref("carsAtEnd"+this.index);
+    carsAtEndRef.on("value",data =>{
+      this.rank = data.val();
+    })
+  }
+
+  //you can call it like Player.updateCarsAtEnd
+  static updateCarsAtEnd(rank){
+    database.ref('/').update({
+      carsAtEnd : rank
+    })
+    
+  }
 
   getDistance() {
     var playerDistanceRef = database.ref("players/player" + this.index);
@@ -65,4 +80,8 @@ class Player {
       allPlayers = data.val();
     });
   }
+
+  
+
+  
 }

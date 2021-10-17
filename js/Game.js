@@ -38,12 +38,15 @@ class Game {
 
     cars = [car1, car2];
 
+    //creating new groups
     fuels = new Group();
     powerCoins = new Group();
+    //create obstacle groups
+    obstacles = new Group()
 
     var obstaclesPositions = [
-      { x: width / 2 + 250, y: height - 800, image: obstacle2Image },
-      { x: width / 2 - 150, y: height - 1300, image: obstacle1Image },
+      { x: width / 2 + 250, y: height - 800, image: obstacle2Image },//index0
+      { x: width / 2 - 150, y: height - 1300, image: obstacle1Image },//index1
       { x: width / 2 + 250, y: height - 1800, image: obstacle1Image },
       { x: width / 2 - 180, y: height - 2300, image: obstacle2Image },
       { x: width / 2, y: height - 2800, image: obstacle2Image },
@@ -61,14 +64,29 @@ class Game {
 
     // Adding coin sprite in the game
     this.addSprites(powerCoins, 18, powerCoinImage, 0.09);
+
+    //call the addsprites for obstacles
+    this.addSprites(obstacles, obstaclesPositions.length, obstacle1Image, 0.03, obstaclesPositions)
   }
 
-  addSprites(spriteGroup, numberOfSprites, spriteImage, scale) {
+  //
+  addSprites(spriteGroup, numberOfSprites, spriteImage, scale, positions=[]) {
     for (var i = 0; i < numberOfSprites; i++) {
       var x, y;
 
+      if(positions.length > 0){
+
+        x = positions[i].x;
+        y = positions[i].y;
+        spriteImage = positions[i].image
+
+      }
+      else{
+
       x = random(width / 2 + 150, width / 2 - 150);
       y = random(-height * 4.5, height - 400);
+
+      }
 
       var sprite = createSprite(x, y);
       sprite.addImage("sprite", spriteImage);
@@ -77,6 +95,8 @@ class Game {
       spriteGroup.add(sprite);
     }
   }
+
+
 
   handleElements() {
     form.hide();
@@ -107,6 +127,7 @@ class Game {
     this.handleResetButton();
 
     Player.getPlayersInfo();
+    player.getCarsAtEnd();
 
     if (allPlayers !== undefined) {
       image(track, 0, -height * 5, width, height * 6);
@@ -131,6 +152,8 @@ class Game {
           fill("red");
           ellipse(x, y, 60, 60);
 
+          this.handleCoins(index);
+          this.handleFuel(index);
           // Changing camera position in y direction
           camera.position.y = cars[index - 1].position.y;
         }
@@ -139,8 +162,38 @@ class Game {
       // handling keyboard events
       this.handlePlayerControls();
 
+      //creating a finishing line 
+     const finishLine = height*6-100;
+
+     //as player reaches finish line
+     if(player.positionY > finishLine){
+       gameState = 2;//change game state to end
+       player.rank += 1;//give a rank to the player
+       Player.updateCarsAtEnd(player.rank);//update it in database
+       this.showRank();
+     }
+
       drawSprites();
     }
+  }
+
+  showRank(){
+    
+    //accepts values like title, image,text,button
+    swal({
+      //congrats
+      // 1
+
+      title : 'Congrats !${"/n"}Rank${"/n"} ${player.rank}',
+      text:'You have finished the Race!!',
+      imageUrl: 'https://raw.githubusercontent.com/vishalgaddam873/p5-multiplayer-car-race-game/master/assets/cup.png',
+      imageSize :100*100,
+      confirmationButton :'OK'
+
+
+
+    });
+
   }
 
   handleResetButton() {
@@ -148,7 +201,8 @@ class Game {
       database.ref("/").set({
         playerCount: 0,
         gameState: 0,
-        players: {}
+        players: {},
+        carsAtEnd :0
       });
       window.location.reload();
     });
@@ -212,5 +266,39 @@ class Game {
       player.positionX += 5;
       player.update();
     }
+  }
+
+  //overlap
+  handleFuel(index){
+
+    cars[index-1].overlap(fuels,collided);
+
+    function collided(collector,collected){
+      player.fuel += 100;
+      player.update();
+
+      collected.remove();
+
+    }
+
+  }
+
+
+  handleCoins(index){
+
+    cars[index-1].overlap(powerCoins,collided);
+
+    //here collector is your car and collected is your coin
+    function collided(collector,collected){
+      player.score += 10
+      player.update();
+
+      //disappearing the coin
+      collected.remove();
+      
+
+    }
+
+
   }
 }
